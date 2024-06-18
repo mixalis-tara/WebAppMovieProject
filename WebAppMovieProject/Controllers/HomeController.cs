@@ -1,11 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
+using WebAppMovieProject.models;
 using WebAppMovieProject.Models;
 
 namespace WebAppMovieProject.Controllers
 {
     public class HomeController : Controller
     {
+        DbmovieappContext db = new DbmovieappContext();
         private readonly ILogger<HomeController> _logger;
 
         public HomeController(ILogger<HomeController> logger)
@@ -13,9 +16,12 @@ namespace WebAppMovieProject.Controllers
             _logger = logger;
         }
 
+
         public IActionResult Index()
         {
-            return View();
+            
+            var movieList = db.Movies.Include(m => m.Platform).ToList();
+            return View(movieList);
         }
 
         public IActionResult Privacy()
