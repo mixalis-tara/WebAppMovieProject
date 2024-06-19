@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebAppMovieProject.models;
 
@@ -9,6 +10,7 @@ public partial class Movie
 
     public string Title { get; set; } = null!;
 
+   
     public DateTime? ReleaseDate { get; set; }
 
     public decimal? ImdbRating { get; set; }

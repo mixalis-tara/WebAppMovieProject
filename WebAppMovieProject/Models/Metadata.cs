@@ -4,7 +4,7 @@ namespace WebAppMovieProject.Models
 {
     public partial class MovieMetadata
     {
-        [Display (Name = "Release Date")]
+        [Display(Name = "Release Date")]
         public DateTime? ReleaseDate { get; set; }
 
         [Display(Name = "Imdb Rating")]
