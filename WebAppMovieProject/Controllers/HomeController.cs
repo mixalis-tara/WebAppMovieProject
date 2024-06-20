@@ -1,14 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
-using WebAppMovieProject.models;
 using WebAppMovieProject.Models;
 
 namespace WebAppMovieProject.Controllers
 {
     public class HomeController : Controller
     {
-        DbmovieappContext db = new DbmovieappContext();
+        dbMovieAppContext db = new dbMovieAppContext();
         private readonly ILogger<HomeController> _logger;
 
         public HomeController(ILogger<HomeController> logger)

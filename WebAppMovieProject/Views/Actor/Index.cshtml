@@ -1,0 +1,34 @@
+﻿@model IEnumerable<WebAppMovieProject.Models.Actor>
+
+@{
+    ViewData["Title"] = "Actors";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table table-hover table-bordered">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.ActorName)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.ActorName)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.ActorId">Edit</a> |
+                <a asp-action="Delete" asp-route-id="@item.ActorId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

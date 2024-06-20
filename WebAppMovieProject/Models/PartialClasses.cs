@@ -8,4 +8,18 @@ namespace WebAppMovieProject.Models
     {
        
     }
+
+    [ModelMetadataType(typeof(ActorMetadata))]
+    public partial class Actor
+    {
+
+    }
+
+    [ModelMetadataType(typeof(CategoryMetadata))]
+    public partial class Category
+    {
+
+    }
+
+
 }

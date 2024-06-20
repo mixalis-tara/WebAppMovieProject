@@ -1,15 +1,15 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using WebAppMovieProject.models;
+using WebAppMovieProject.Models;
 
 namespace WebAppMovieProject.Controllers
 {
     public class MovieController : Controller
     {
-        DbmovieappContext db = new DbmovieappContext();
+        dbMovieAppContext db = new dbMovieAppContext();
         // GET: MovieController
-        public ActionResult Index(int? CategoryId, int? PlatformId)
+        public ActionResult Index(int? CategoryId, int? PlatformId, decimal? ImdbRating)
         {
             
             var movies = db.Movies
@@ -26,10 +26,19 @@ namespace WebAppMovieProject.Controllers
                 movies = movies.Where(m => m.PlatformId == PlatformId);
             }
 
+            if (ImdbRating.HasValue)
+            {
+                movies = movies.Where(m => m.ImdbRating >= ImdbRating);
+            }
+
+            var imdbRatings = db.Movies.Select(m => m.ImdbRating).Distinct().OrderBy(r => r).ToList();
+
             var categories = db.Categories.ToList();
-            var platforms = db.Streamingplatforms.ToList();
+            var platforms = db.StreamingPlatforms.ToList();
+
             ViewBag.Platform = platforms;
             ViewBag.Categories = categories;
+            ViewBag.ImdbRatings = imdbRatings;
 
 
             return View(movies.ToList());
