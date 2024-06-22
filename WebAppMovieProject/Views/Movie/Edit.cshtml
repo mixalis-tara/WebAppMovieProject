@@ -1,0 +1,77 @@
+﻿@model WebAppMovieProject.Models.MovieViewModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Movie</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Movie.MovieId" />
+            <div class="form-group">
+                <label asp-for="Movie.Title" class="control-label">@Html.DisplayNameFor(model => model.Movie.Title)</label>
+                <input asp-for="Movie.Title" class="form-control" />
+                <span asp-validation-for="Movie.Title" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Movie.ReleaseDate" class="control-label">@Html.DisplayNameFor(model => model.Movie.ReleaseDate)</label>
+                <input asp-for="Movie.ReleaseDate" class="form-control datepicker" />
+                <span asp-validation-for="Movie.ReleaseDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Movie.ImdbRating" class="control-label">@Html.DisplayNameFor(model => model.Movie.ImdbRating)</label>
+                <input asp-for="Movie.ImdbRating" class="form-control" type="number" step="0.1" />
+                <span asp-validation-for="Movie.ImdbRating" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Movie.ImageUrl" class="control-label">@Html.DisplayNameFor(model => model.Movie.ImageUrl)</label>
+                <input asp-for="Movie.ImageUrl" class="form-control" />
+                <span asp-validation-for="Movie.ImageUrl" class="text-danger"></span>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="Movie.Watched" /> @Html.DisplayNameFor(model => model.Movie.Watched)
+                </label>
+            </div>
+            <div class="form-group">
+                <label asp-for="Movie.WatchedDate" class="control-label">@Html.DisplayNameFor(model => model.Movie.WatchedDate)</label>
+                <input asp-for="Movie.WatchedDate" class="form-control datepicker" />
+                <span asp-validation-for="Movie.WatchedDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Movie.PlatformId" class="control-label">@Html.DisplayNameFor(model => model.Movie.PlatformId)</label>
+                <select asp-for="Movie.PlatformId" class="form-control" asp-items="Model.Platforms"></select>
+                <span asp-validation-for="Movie.PlatformId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SelectedCategoryIds" class="control-label">@Html.DisplayNameFor(model => model.SelectedCategoryIds)</label>
+                @Html.ListBoxFor(model => model.SelectedCategoryIds, Model.Categories, new { @class = "form-control select2-multiple" })
+                <span asp-validation-for="SelectedCategoryIds" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('.select2-multiple').select2();
+            $('.datepicker').datepicker({
+                dateFormat: 'yy-mm-dd'
+            });
+        });
+    </script>
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

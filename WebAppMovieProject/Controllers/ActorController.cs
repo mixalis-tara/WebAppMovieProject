@@ -11,7 +11,7 @@ namespace WebAppMovieProject.Controllers
 
         public ActionResult Index()
         {
-            var actorList = db.Actors.ToList();
+            var actorList = db.Actors.OrderBy(c=> c.ActorName).ToList();
             return View(actorList);
         }
 
@@ -53,7 +53,7 @@ namespace WebAppMovieProject.Controllers
         // POST: ActorController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, Actor theActor)
+        public ActionResult Edit(Actor theActor)
         {
             try
             {   
@@ -75,7 +75,7 @@ namespace WebAppMovieProject.Controllers
             {
                 return NotFound();
             }
-            return View();
+            return View(actor);
         }
 
         // POST: ActorController/Delete/5

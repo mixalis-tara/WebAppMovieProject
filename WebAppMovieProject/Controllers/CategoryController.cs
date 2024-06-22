@@ -11,7 +11,7 @@ namespace WebAppMovieProject.Controllers
         // GET: CategoryController
         public ActionResult Index()
         {
-            var categoryList = db.Categories.ToList();
+            var categoryList = db.Categories.OrderBy(c => c.CategoryName).ToList();
             return View(categoryList);
         }
 
@@ -55,7 +55,7 @@ namespace WebAppMovieProject.Controllers
         // POST: CategoryController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, Category theCategory)
+        public ActionResult Edit(Category theCategory)
         {
             try
             {

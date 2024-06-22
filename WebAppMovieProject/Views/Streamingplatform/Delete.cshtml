@@ -1,0 +1,19 @@
+﻿@model WebAppMovieProject.Models.StreamingPlatform
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<h1>Delete</h1>
+
+<h3>Are you sure you want to delete this platform?</h3>
+<br />
+<div>
+    <h3>@Model.PlatformName</h3>
+    <form asp-action="DeleteConfirmed" asp-route-id="@Model.PlatformId" method="post">
+        <div class="form-group">
+            <input type="submit" value="Delete" class="btn btn-danger" />
+            <a asp-action="Index" class="btn btn-default">Cancel</a>
+        </div>
+    </form>
+</div>

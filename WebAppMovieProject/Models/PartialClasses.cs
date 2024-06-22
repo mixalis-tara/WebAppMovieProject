@@ -6,7 +6,7 @@ namespace WebAppMovieProject.Models
     [ModelMetadataType(typeof(MovieMetadata))]
     public partial class Movie
     {
-       
+
     }
 
     [ModelMetadataType(typeof(ActorMetadata))]
@@ -21,5 +21,16 @@ namespace WebAppMovieProject.Models
 
     }
 
+    [ModelMetadataType(typeof(StreamingPlatformMetadata))]
+    public partial class StreamingPlatform
+    {
+
+    }
+
+    [ModelMetadataType(typeof(MovieViewModelMetadata))]
+    public partial class MovieViewModel
+    {
+
+    }
 
 }

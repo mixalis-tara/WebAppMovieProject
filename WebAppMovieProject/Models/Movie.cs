@@ -28,4 +28,5 @@ public partial class Movie
     public virtual ICollection<Actor> Actors { get; set; } = new List<Actor>();
 
     public virtual ICollection<Category> Categories { get; set; } = new List<Category>();
+
 }
