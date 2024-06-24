@@ -15,8 +15,7 @@ namespace WebAppMovieProject.Models
         [Display(Name = "Watched Date")]
         public DateTime? WatchedDate { get; set; }
 
-        [Display(Name = "Image Name")]
-        [Required(ErrorMessage = "Give Image Name")]
+        [Display(Name = "Image")]
         public string ImageUrl { get; set; }
 
         [Display(Name = "Platform")]
@@ -50,5 +49,9 @@ namespace WebAppMovieProject.Models
         [Display(Name = "Categories")]
         [Required(ErrorMessage = "Choice Category")]
         public int[] SelectedCategoryIds { get; set; }
+
+        [Display(Name = "Actors")]
+        [Required(ErrorMessage = "Choice Actor")]
+        public int[] SelectedActorsIds { get; set; }
     }
 }

@@ -4,58 +4,41 @@
     ViewData["Title"] = "Home Page";
 }
 
-<h1>Movie Application</h1>
+<h1 class="text-center">Recomended Movies</h1>
+<div class="container mt-4">
+    <div class="row">
+        @foreach (var movie in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <img class="card-img-top movie-img" src="@movie.ImageUrl" alt="@movie.Title">
+                    <div class="card-body">
+                        <h5 class="card-title">@movie.Title</h5>
+                        <p class="card-text">
+                            <strong>Release Date:</strong> @movie.ReleaseDate?.ToString("yyyy-MM-dd")<br />
+                            <strong>IMDb Rating:</strong> @movie.ImdbRating?.ToString("F1")<br />
+                            <strong>Platform:</strong> @movie.Platform?.PlatformName<br />
+                            <strong>Categories:</strong>
+                            @{
+                                var categories = movie.Categories.ToList();
+                                for (var i = 0; i< categories.Count; i++)
+                                {
+                                    @categories[i].CategoryName
+                                    if(i < categories.Count - 1)
+                                    {
+                                        @:, 
+                                    }
+                                }
+                            }
+                        </p>
+                    </div>
+                    <div class="card-footer text-center">
+                        <a href="@Url.Action("Details", "Movie", new { id = movie.MovieId })" class="btn btn-primary">View Details</a>
+                        <a href="@Url.Action("Edit", "Movie", new { id = movie.MovieId })" class="btn btn-secondary">Edit</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table table-hover table-bordered">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ReleaseDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ImdbRating)
-            </th>
-            
-            <th>
-                @Html.DisplayNameFor(model => model.WatchedDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Platform)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ReleaseDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ImdbRating)
-            </td>
-            
-            <td>
-                @Html.DisplayFor(modelItem => item.WatchedDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Platform.PlatformName)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.MovieId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.MovieId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.MovieId">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>

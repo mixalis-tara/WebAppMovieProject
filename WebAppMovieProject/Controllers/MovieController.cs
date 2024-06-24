@@ -1,8 +1,13 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using RestSharp;
 using System.Globalization;
+using System.Net;
+using System.Net.Http.Headers;
 using WebAppMovieProject.Models;
 using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 
@@ -10,11 +15,19 @@ namespace WebAppMovieProject.Controllers
 {
     public class MovieController : Controller
     {
-        dbMovieAppContext db = new dbMovieAppContext();
+        private readonly dbMovieAppContext db;
+        private readonly IWebHostEnvironment _hostEnvironment;
+        private readonly HttpClient _httpClient;
+        public MovieController(dbMovieAppContext dbase, IWebHostEnvironment hostEnvironment, HttpClient httpClient)
+        {
+            db = dbase;
+            _hostEnvironment = hostEnvironment;
+            _httpClient = httpClient;
+        }
         // GET: MovieController
         public ActionResult Index(int? CategoryId, int? PlatformId, decimal? ImdbRating)
         {
-            
+
             var movies = db.Movies
                 .Include(m => m.Platform)
                 .Include(c => c.Categories)
@@ -25,20 +38,20 @@ namespace WebAppMovieProject.Controllers
             {
                 movies = movies.Where(m => m.Categories.Any(c => c.CategoryId == CategoryId)).OrderBy(x => x.Title);
             }
-            if(PlatformId.HasValue && PlatformId.Value >0)
+            if (PlatformId.HasValue && PlatformId.Value > 0)
             {
                 movies = movies.Where(m => m.PlatformId == PlatformId).OrderBy(c => c.Title);
             }
 
             if (ImdbRating.HasValue)
             {
-                movies = movies.Where(m => m.ImdbRating >= ImdbRating).OrderBy(c=>c.ImdbRating);
+                movies = movies.Where(m => m.ImdbRating >= ImdbRating).OrderBy(c => c.ImdbRating);
             }
 
             var imdbRatings = db.Movies.Select(m => m.ImdbRating).Distinct().OrderBy(r => r).ToList();
 
-            var categories = db.Categories.ToList().OrderBy(c=> c.CategoryName);
-            var platforms = db.StreamingPlatforms.ToList().OrderBy(c=> c.PlatformName);
+            var categories = db.Categories.ToList().OrderBy(c => c.CategoryName);
+            var platforms = db.StreamingPlatforms.ToList().OrderBy(c => c.PlatformName);
 
             ViewBag.Platform = platforms;
             ViewBag.Categories = categories;
@@ -54,14 +67,15 @@ namespace WebAppMovieProject.Controllers
             var movie = db.Movies
                         .Include(m => m.Platform)
                         .Include(m => m.Categories)
+                        .Include(c => c.Actors)
                         .FirstOrDefault(c => c.MovieId == id);
-            
-            if(movie == null)
+
+            if (movie == null)
             {
                 return NotFound();
             }
-            
-            
+
+
             return View(movie);
         }
 
@@ -78,6 +92,15 @@ namespace WebAppMovieProject.Controllers
                     Text = c.CategoryName
                 }).ToList();
 
+            var actors = db.Actors
+                .OrderBy(c => c.ActorName)
+                .Select(c => new SelectListItem
+                {
+                    Value = c.ActorId.ToString(),
+                    Text = c.ActorName
+                }).ToList();
+
+
             var platforms = db.StreamingPlatforms
                 .OrderBy(c => c.PlatformName)
                 .Select(c => new SelectListItem
@@ -89,7 +112,8 @@ namespace WebAppMovieProject.Controllers
             var viewModel = new MovieViewModel
             {
                 Categories = categories,
-                Platforms = platforms
+                Platforms = platforms,
+                Actors = actors
             };
             return View(viewModel);
         }
@@ -97,44 +121,91 @@ namespace WebAppMovieProject.Controllers
         // POST: MovieController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(MovieViewModel viewModel)
+        public async Task<IActionResult> Create(MovieViewModel viewModel)
         {
 
             try
             {
+                if (viewModel.ImageFile != null && viewModel.ImageFile.Length > 0)
+                {
+                    viewModel.Movie.ImageUrl = await UploadImageToImgBB(viewModel.ImageFile);
+                }
+
                 viewModel.Movie.Categories = db.Categories
                         .Where(c => viewModel.SelectedCategoryIds.Contains(c.CategoryId))
                         .ToList();
 
-                
+                viewModel.Movie.Actors = db.Actors
+                        .Where(c => viewModel.SelectedActorsIds.Contains(c.ActorId))
+                        .ToList();
+
+
                 db.Movies.Add(viewModel.Movie);
                 db.SaveChanges();
                 return RedirectToAction(nameof(Index));
 
             }
-            catch
+            catch (Exception ex)
             {
-
+                // Handle exception
+                ModelState.AddModelError(string.Empty, "Error occurred while saving.");
             }
-            
+
 
             return View();
         }
+        private async Task<string> UploadImageToImgBB(IFormFile imageFile)
+        {
+            try
+            {
+                _httpClient.BaseAddress = new Uri("https://api.imgbb.com/1/");
+                _httpClient.DefaultRequestHeaders.Accept.Clear();
+                _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                var formData = new MultipartFormDataContent();
+                formData.Add(new StringContent("96a5f4bf06400ad6edb3b81b9c706a80"), "key"); // Replace with your imgBB API key
+                formData.Add(new StreamContent(imageFile.OpenReadStream()), "image", imageFile.FileName);
+
+                var response = await _httpClient.PostAsync("upload", formData);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    dynamic jsonResponse = JsonConvert.DeserializeObject(responseContent);
+                    string imageUrl = jsonResponse.data.url; // Adjust according to imgBB API response structure
+                    return imageUrl;
+                }
+                else
+                {
+                    // Handle the case when the request was not successful
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    throw new Exception($"Failed to upload image to imgBB. Error: {errorContent}");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle exceptions here, log them, or rethrow as needed
+                throw new Exception("Error uploading image to imgBB", ex);
+            }
+        }
+
 
         // GET: MovieController/Edit/5
-        public ActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id)
         {
-            if (id <= 0 )
+            if (id <= 0)
             {
                 return NotFound();
             }
             var movie = db.Movies
                         .Include(m => m.Categories)
+                        .Include(c => c.Actors)
                         .FirstOrDefault(m => m.MovieId == id);
             if (movie == null)
             {
                 return NotFound();
             }
+
 
             var categories = db.Categories
                 .OrderBy(c => c.CategoryName)
@@ -152,30 +223,49 @@ namespace WebAppMovieProject.Controllers
                     Text = c.PlatformName
                 }).ToList();
 
+            var actors = db.Actors
+                .OrderBy(c => c.ActorName)
+                .Select(c => new SelectListItem
+                {
+                    Value = c.ActorId.ToString(),
+                    Text = c.ActorName
+                }).ToList();
+
             var viewModel = new MovieViewModel
             {
                 Movie = movie,
                 SelectedCategoryIds = movie.Categories.Select(c => c.CategoryId).ToArray(),
                 Categories = categories,
-                Platforms = platforms
+                SelectedActorsIds = movie.Actors.Select(c => c.ActorId).ToArray(),
+                Actors = actors,
+                Platforms = platforms,
+                CurrentImageName = movie.ImageUrl
             };
+            
             return View(viewModel);
         }
 
         // POST: MovieController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, MovieViewModel viewModel)
+        public async Task<IActionResult> Edit(int id, MovieViewModel viewModel, IFormFile imageFile)
         {
             try
             {
                 var movieToUpdate = db.Movies
                 .Include(m => m.Categories)
+                .Include(c => c.Actors)
                 .FirstOrDefault(m => m.MovieId == id);
+
+
                 viewModel.Movie.Categories = db.Categories
                         .Where(c => viewModel.SelectedCategoryIds.Contains(c.CategoryId))
                         .ToList();
+                viewModel.Movie.Actors = db.Actors
+                        .Where(c => viewModel.SelectedActorsIds.Contains(c.ActorId))
+                        .ToList();
 
+                
 
                 db.Entry(movieToUpdate).CurrentValues.SetValues(viewModel.Movie);
                 movieToUpdate.Categories.Clear();
@@ -187,7 +277,25 @@ namespace WebAppMovieProject.Controllers
                         movieToUpdate.Categories.Add(category);
                     }
                 }
-                db.SaveChanges();
+                movieToUpdate.Actors.Clear();
+                foreach (var actorId in viewModel.SelectedActorsIds)
+                {
+                    var actor = db.Actors.Find(actorId);
+                    if (actor != null)
+                    {
+                        movieToUpdate.Actors.Add(actor);
+                    }
+                }
+                if (imageFile != null && imageFile.Length > 0)
+                {
+                    movieToUpdate.ImageUrl = await UploadImageToImgBB(imageFile);
+                }
+
+
+
+                db.Update(movieToUpdate);
+                await db.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Index));
             }
             catch
@@ -195,20 +303,34 @@ namespace WebAppMovieProject.Controllers
                 return View();
             }
         }
+        
 
         // GET: MovieController/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            var movie = db.Movies.Find(id);
+            if (movie == null)
+            {
+                return NotFound();
+            }
+            return View(movie);
         }
 
         // POST: MovieController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult Delete(int id, Movie theMovie)
         {
             try
             {
+                var movie = db.Movies.Find(id);
+                if (movie == null)
+                {
+                    return NotFound();
+                }
+                db.Movies.Remove(movie);
+                db.SaveChanges();
+
                 return RedirectToAction(nameof(Index));
             }
             catch

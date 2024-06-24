@@ -4,64 +4,83 @@
     ViewData["Title"] = "Edit";
 }
 
-<h1>Edit</h1>
+<div class="container mt-4">
+    <h1 class="text-center">@ViewData["Title"]</h1>
+    <h4 class="mb-4">Movie</h4>
+    <hr />
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Movie.MovieId" />
+                <div class="form-group">
+                    <label asp-for="Movie.Title" class="control-label">@Html.DisplayNameFor(model => model.Movie.Title)</label>
+                    <input asp-for="Movie.Title" class="form-control" />
+                    <span asp-validation-for="Movie.Title" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Movie.ReleaseDate" class="control-label">@Html.DisplayNameFor(model => model.Movie.ReleaseDate)</label>
+                    <input asp-for="Movie.ReleaseDate" class="form-control datepicker" />
+                    <span asp-validation-for="Movie.ReleaseDate" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Movie.ImdbRating" class="control-label">@Html.DisplayNameFor(model => model.Movie.ImdbRating)</label>
+                    <input asp-for="Movie.ImdbRating" class="form-control" type="number" step="0.1" />
+                    <span asp-validation-for="Movie.ImdbRating" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label>Current Image</label>
+                    @if (!string.IsNullOrEmpty(Model.CurrentImageName))
+                    {
+                        <div id="current-image-container">
+                            <img src="@Model.CurrentImageName" alt="Current Image" width="200" />
+                        </div>
+                    }
+                </div>
 
-<h4>Movie</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Movie.MovieId" />
-            <div class="form-group">
-                <label asp-for="Movie.Title" class="control-label">@Html.DisplayNameFor(model => model.Movie.Title)</label>
-                <input asp-for="Movie.Title" class="form-control" />
-                <span asp-validation-for="Movie.Title" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Movie.ReleaseDate" class="control-label">@Html.DisplayNameFor(model => model.Movie.ReleaseDate)</label>
-                <input asp-for="Movie.ReleaseDate" class="form-control datepicker" />
-                <span asp-validation-for="Movie.ReleaseDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Movie.ImdbRating" class="control-label">@Html.DisplayNameFor(model => model.Movie.ImdbRating)</label>
-                <input asp-for="Movie.ImdbRating" class="form-control" type="number" step="0.1" />
-                <span asp-validation-for="Movie.ImdbRating" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Movie.ImageUrl" class="control-label">@Html.DisplayNameFor(model => model.Movie.ImageUrl)</label>
-                <input asp-for="Movie.ImageUrl" class="form-control" />
-                <span asp-validation-for="Movie.ImageUrl" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="Movie.Watched" /> @Html.DisplayNameFor(model => model.Movie.Watched)
-                </label>
-            </div>
-            <div class="form-group">
-                <label asp-for="Movie.WatchedDate" class="control-label">@Html.DisplayNameFor(model => model.Movie.WatchedDate)</label>
-                <input asp-for="Movie.WatchedDate" class="form-control datepicker" />
-                <span asp-validation-for="Movie.WatchedDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Movie.PlatformId" class="control-label">@Html.DisplayNameFor(model => model.Movie.PlatformId)</label>
-                <select asp-for="Movie.PlatformId" class="form-control" asp-items="Model.Platforms"></select>
-                <span asp-validation-for="Movie.PlatformId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="SelectedCategoryIds" class="control-label">@Html.DisplayNameFor(model => model.SelectedCategoryIds)</label>
-                @Html.ListBoxFor(model => model.SelectedCategoryIds, Model.Categories, new { @class = "form-control select2-multiple" })
-                <span asp-validation-for="SelectedCategoryIds" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+                <div class="form-group" id="upload-image-container" style="display: none;">
+                    <label asp-for="ImageFile" class="control-label">Upload Image</label>
+                    <input asp-for="ImageFile" type="file" class="form-control" id="imageFileInput" />
+                    <span asp-validation-for="ImageFile" class="text-danger"></span>
+                </div>
+                <button type="button" id="edit-image-button" class="btn btn-primary">Change Image</button>
+
+
+                <div class="form-group form-check">
+                    <label class="form-check-label">
+                        <input class="form-check-input" asp-for="Movie.Watched" /> @Html.DisplayNameFor(model => model.Movie.Watched)
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Movie.WatchedDate" class="control-label">@Html.DisplayNameFor(model => model.Movie.WatchedDate)</label>
+                    <input asp-for="Movie.WatchedDate" class="form-control datepicker" />
+                    <span asp-validation-for="Movie.WatchedDate" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Movie.PlatformId" class="control-label">@Html.DisplayNameFor(model => model.Movie.PlatformId)</label>
+                    <select asp-for="Movie.PlatformId" class="form-control" asp-items="Model.Platforms"></select>
+                    <span asp-validation-for="Movie.PlatformId" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="SelectedCategoryIds" class="control-label">@Html.DisplayNameFor(model => model.SelectedCategoryIds)</label>
+                    @Html.ListBoxFor(model => model.SelectedCategoryIds, Model.Categories, new { @class = "form-control select2-multiple" })
+                    <span asp-validation-for="SelectedCategoryIds" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="SelectedActorsIds" class="control-label">@Html.DisplayNameFor(model => model.SelectedActorsIds)</label>
+                    @Html.ListBoxFor(model => model.SelectedActorsIds, Model.Actors, new { @class = "form-control select2-multiple" })
+                    <span asp-validation-for="SelectedActorsIds" class="text-danger"></span>
+                </div>
+                <hr />
+                <div class="form-group text-center">
+                    <input type="submit" value="Save" class="btn btn-primary" /> |
+                    <a class="btn btn-secondary" asp-action="Index">Back to List</a> |
+                    <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Index">Back to Home</a>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>
 
 @section Scripts {
@@ -71,7 +90,14 @@
             $('.datepicker').datepicker({
                 dateFormat: 'yy-mm-dd'
             });
+
+            $('#edit-image-button').click(function () {
+                $('#current-image-container').hide();
+                $('#upload-image-container').show();
+            });
         });
     </script>
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

@@ -6,105 +6,94 @@
 
 <h1>Movies</h1>
 <p>
-    <a asp-action="Create">Create New</a>
+    <a class="btn btn-primary" asp-action="Create">Create New</a>
 </p>
 <br />
 
-<form method="get" asp-action="Index">
-    <div class="form-group">
-        <label for="CategoryId">Category</label>
-        <select id="CategoryId" name="CategoryId" class="form-control">
-            <option value="">All</option>
-            @foreach (var category in ViewBag.Categories as IEnumerable<WebAppMovieProject.Models.Category>)
-            {
-                <option value="@category.CategoryId">@category.CategoryName</option>
-            }
-        </select>
-    </div>
-    <div class="form-group">
-        <label for="PlatformId">Platform</label>
-        <select id="PlatformId" name="PlatformId" class="form-control">
-            <option value="">All</option>
-            @foreach (var platform in ViewBag.Platform as IEnumerable<WebAppMovieProject.Models.StreamingPlatform>)
-            {
-                <option value="@platform.PlatformId">@platform.PlatformName</option>
-            }
-        </select>
-    </div>
-    <div class="form-group">
-        <label for="ImdbRating">Imdb Ratings</label>
-        <select id="ImdbRating" name="ImdbRating" class="form-control">
-            <option value="">All</option>
-            @foreach (var rating in ViewBag.ImdbRatings as IEnumerable<decimal?>)
-            {
-                <option value="@rating.Value.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)">
-                    @rating.Value.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)
-                </option>
+<form method="get" asp-action="Index" class="mb-4">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="CategoryId">Category</label>
+                <select id="CategoryId" name="CategoryId" class="form-control">
+                    <option value="">All</option>
+                    @foreach (var category in ViewBag.Categories as IEnumerable<WebAppMovieProject.Models.Category>)
+                    {
+                        <option value="@category.CategoryId">@category.CategoryName</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="PlatformId">Platform</label>
+                <select id="PlatformId" name="PlatformId" class="form-control">
+                    <option value="">All</option>
+                    @foreach (var platform in ViewBag.Platform as IEnumerable<WebAppMovieProject.Models.StreamingPlatform>)
+                    {
+                        <option value="@platform.PlatformId">@platform.PlatformName</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="ImdbRating">Imdb Ratings</label>
+                <select id="ImdbRating" name="ImdbRating" class="form-control">
+                    <option value="">All</option>
+                    @foreach (var rating in ViewBag.ImdbRatings as IEnumerable<decimal?>)
+                    {
+                        <option value="@rating.Value.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)">
+                            @rating.Value.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)
+                        </option>
             
-            }
-        </select>
+                    }
+                </select>
+            </div>
+        </div>
     </div>
-    <button type="submit" class="btn btn-primary">Search</button>
+    <hr />
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </div>
 </form>
 
-<table class="table table-hover table-bordered">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ReleaseDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ImdbRating)
-            </th>
-
-            <th>
-                @Html.DisplayNameFor(model => model.WatchedDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Platform)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Categories)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Title)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.ReleaseDate)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.ImdbRating)
-                </td>
-
-                <td>
-                    @Html.DisplayFor(modelItem => item.WatchedDate)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Platform.PlatformName)
-                </td>
-                <td>
-                    @foreach (var category in item.Categories)
-                    {
-                        @category.CategoryName
-
-                        <br />
-                    }
-                </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.MovieId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.MovieId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.MovieId">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+<div class="container mt-4">
+    <div class="row">
+        @foreach (var movie in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <img class="card-img-top movie-img" src="@movie.ImageUrl" alt="@movie.Title">
+                    <div class="card-body">
+                        <h5 class="card-title">@movie.Title</h5>
+                        <p class="card-text">
+                            <strong>Release Date:</strong> @movie.ReleaseDate?.ToString("yyyy-MM-dd")<br />
+                            <strong>IMDb Rating:</strong> @movie.ImdbRating?.ToString("F1")<br />
+                            <strong>Platform:</strong> @movie.Platform?.PlatformName<br />
+                            <strong>Categories:</strong>
+                            @{
+                                var categories = movie.Categories.ToList();
+                                for (var i = 0; i < categories.Count; i++)
+                                {
+                                    @categories[i].CategoryName
+                                    if (i < categories.Count - 1)
+                                    {
+                                        @:, 
+                                    }
+                                }
+                            }
+                        </p>
+                    </div>
+                    <div class="card-footer text-center">
+                        <a href="@Url.Action("Details", "Movie", new { id = movie.MovieId })" class="btn btn-primary">View Details</a>
+                        <a href="@Url.Action("Edit", "Movie", new { id = movie.MovieId })" class="btn btn-secondary">Edit</a>
+                        <a href="@Url.Action("Delete", "Movie", new { id = movie.MovieId })" class="btn btn-danger">Delete</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

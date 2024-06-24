@@ -19,7 +19,11 @@ namespace WebAppMovieProject.Controllers
         public IActionResult Index()
         {
             
-            var movieList = db.Movies.Include(m => m.Platform).ToList();
+            var movieList = db.Movies
+                .Include(m => m.Platform)
+                .Include(x => x.Categories)
+                .Where(c => c.Watched == false)
+                .ToList();
             return View(movieList);
         }
 
