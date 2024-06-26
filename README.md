@@ -11,6 +11,7 @@ This Movie Web Application is built using ASP.NET Core with Entity Framework for
 - **Category Management**: Add, edit, delete, and list categories.
 - **Platform Management**: Add, edit, delete, and list platforms.
 - **Image Upload**: Upload images for movies using ImgBB API.
+- **Movie Synopsis**: Fetches a brief summary or synopsis of movies using the IMDb API.
 - **Filtering**: Filter movies by category, platform, and IMDb ratings.
 - **Recommendations**: Display recommended movies on the home page.
 - **Enhanced UI**: Utilize Bootstrap for a responsive and visually appealing design.
@@ -19,10 +20,11 @@ This Movie Web Application is built using ASP.NET Core with Entity Framework for
 
 ## Technologies Used
 
-- **Backend**: ASP.NET Core, Entity Framework Core
-- **Frontend**: Bootstrap, JavaScript, Select2
+- **Backend**: ASP.NET Core, Entity Framework Core, HttpClient
+- **Frontend**: Bootstrap, JavaScript (for API integration), Select2
 - **Database**: MSSQL
 - **Image Hosting**: ImgBB API
+- **API for Synopsis**: IMDb API (RapidAPI)
 
 ## Installation
 
@@ -99,6 +101,15 @@ Bootstrap is included via CDN. To customize the styling:
 
 1. Override Bootstrap styles in your custom CSS files.
 2. Ensure the custom CSS file is included after the Bootstrap CDN link in your views.
+
+### Example Use Case
+
+Imagine a scenario where a user clicks on a movie title and expects to see a brief synopsis or additional details. Your application fetches this information in real-time from IMDb using the integrated API, providing a seamless experience for the user without leaving your site.
+Benefits
+
+- Real-Time Information: Provides up-to-date movie information directly from IMDb.
+- Enhanced User Experience: Delivers richer content to users, increasing engagement.
+- Flexible Integration: Easily expandable to include more features leveraging IMDb's extensive database.
 
 ---
 
