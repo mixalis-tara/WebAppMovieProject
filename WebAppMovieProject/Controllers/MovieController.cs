@@ -62,7 +62,7 @@ namespace WebAppMovieProject.Controllers
         }
 
         // GET: MovieController/Details/5
-        public ActionResult Details(int id)
+        public async Task<ActionResult> Details(int id)
         {
             var movie = db.Movies
                         .Include(m => m.Platform)
@@ -75,7 +75,8 @@ namespace WebAppMovieProject.Controllers
                 return NotFound();
             }
 
-
+            string synopsis = await GetSynopsisByTitle(movie.Title);
+            ViewBag.Synopsis = synopsis;
             return View(movie);
         }
 
@@ -154,41 +155,7 @@ namespace WebAppMovieProject.Controllers
 
             return View();
         }
-        private async Task<string> UploadImageToImgBB(IFormFile imageFile)
-        {
-            try
-            {
-                _httpClient.BaseAddress = new Uri("https://api.imgbb.com/1/");
-                _httpClient.DefaultRequestHeaders.Accept.Clear();
-                _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                var formData = new MultipartFormDataContent();
-                formData.Add(new StringContent("96a5f4bf06400ad6edb3b81b9c706a80"), "key"); // Replace with your imgBB API key
-                formData.Add(new StreamContent(imageFile.OpenReadStream()), "image", imageFile.FileName);
-
-                var response = await _httpClient.PostAsync("upload", formData);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    var responseContent = await response.Content.ReadAsStringAsync();
-                    dynamic jsonResponse = JsonConvert.DeserializeObject(responseContent);
-                    string imageUrl = jsonResponse.data.url; // Adjust according to imgBB API response structure
-                    return imageUrl;
-                }
-                else
-                {
-                    // Handle the case when the request was not successful
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Failed to upload image to imgBB. Error: {errorContent}");
-                }
-            }
-            catch (Exception ex)
-            {
-                // Handle exceptions here, log them, or rethrow as needed
-                throw new Exception("Error uploading image to imgBB", ex);
-            }
-        }
-
+        
 
         // GET: MovieController/Edit/5
         public async Task<IActionResult> Edit(int id)
@@ -290,6 +257,10 @@ namespace WebAppMovieProject.Controllers
                 {
                     movieToUpdate.ImageUrl = await UploadImageToImgBB(imageFile);
                 }
+                else
+                {
+                    movieToUpdate.ImageUrl = viewModel.CurrentImageName;
+                }
 
 
 
@@ -338,5 +309,110 @@ namespace WebAppMovieProject.Controllers
                 return View();
             }
         }
+
+        private async Task<string> UploadImageToImgBB(IFormFile imageFile)
+        {
+            try
+            {
+                _httpClient.BaseAddress = new Uri("https://api.imgbb.com/1/");
+                _httpClient.DefaultRequestHeaders.Accept.Clear();
+                _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                var formData = new MultipartFormDataContent();
+                formData.Add(new StringContent("96a5f4bf06400ad6edb3b81b9c706a80"), "key");
+                formData.Add(new StreamContent(imageFile.OpenReadStream()), "image", imageFile.FileName);
+
+                var response = await _httpClient.PostAsync("upload", formData);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseContent = await response.Content.ReadAsStringAsync();
+                    dynamic jsonResponse = JsonConvert.DeserializeObject(responseContent);
+                    string imageUrl = jsonResponse.data.url;
+                    return imageUrl;
+                }
+                else
+                {
+
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    throw new Exception($"Failed to upload image to imgBB. Error: {errorContent}");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error uploading image to imgBB", ex);
+            }
+        }
+        private async Task<string> GetTconstByTitle(string title)
+        {
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri($"https://imdb8.p.rapidapi.com/title/find?q={Uri.EscapeDataString(title)}"),
+                Headers =
+                {
+                    { "x-rapidapi-key", "2fbf2bb0f0msh105344e2de9a71ep111cb3jsn3f45f1539954" },
+                    { "x-rapidapi-host", "imdb8.p.rapidapi.com" },
+                },
+            };
+
+            using (var response = await _httpClient.SendAsync(request))
+            {
+                response.EnsureSuccessStatusCode();
+                var body = await response.Content.ReadAsStringAsync();
+                dynamic result = JsonConvert.DeserializeObject(body);
+                var movie = result.results[0]; 
+                return movie.id;
+            }
+        }
+
+        private async Task<string> GetSynopsisByTconst(string tconst)
+        {
+            tconst = tconst.Replace("/title/", "").Trim('/');
+
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri($"https://imdb8.p.rapidapi.com/title/get-synopses?tconst={tconst}"),
+                Headers =
+                {
+                    { "x-rapidapi-key", "2fbf2bb0f0msh105344e2de9a71ep111cb3jsn3f45f1539954" },
+                    { "x-rapidapi-host", "imdb8.p.rapidapi.com" },
+                },
+                    };
+
+            using (var response = await _httpClient.SendAsync(request))
+            {
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    throw new Exception($"Request failed with status code {response.StatusCode}. Error: {errorContent}");
+                }
+
+                var body = await response.Content.ReadAsStringAsync();
+
+                if (string.IsNullOrEmpty(body))
+                {
+                    throw new Exception("Response content is empty.");
+                }
+
+                dynamic result = JsonConvert.DeserializeObject(body);
+
+                if (result == null || result.Count == 0)
+                {
+                    throw new Exception("No synopsis found in the response.");
+                }
+
+                return result[0].text;
+            }
+        }
+
+        private async Task<string> GetSynopsisByTitle(string title)
+        {
+            string tconst = await GetTconstByTitle(title);
+            return await GetSynopsisByTconst(tconst);
+        }
+
+
     }
 }
