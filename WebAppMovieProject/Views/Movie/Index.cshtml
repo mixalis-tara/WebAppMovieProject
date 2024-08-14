@@ -19,7 +19,9 @@
                     <option value="">All</option>
                     @foreach (var category in ViewBag.Categories as IEnumerable<WebAppMovieProject.Models.Category>)
                     {
-                        <option value="@category.CategoryId">@category.CategoryName</option>
+                        <option value="@category.CategoryId" selected="@(category.CategoryId == ViewBag.SelectedCategoryId ? "selected" : null)">
+                            @category.CategoryName
+                        </option>
                     }
                 </select>
             </div>
@@ -31,7 +33,9 @@
                     <option value="">All</option>
                     @foreach (var platform in ViewBag.Platform as IEnumerable<WebAppMovieProject.Models.StreamingPlatform>)
                     {
-                        <option value="@platform.PlatformId">@platform.PlatformName</option>
+                        <option value="@platform.PlatformId" selected="@(platform.PlatformId == ViewBag.SelectedPlatformId ? "selected" : null)">
+                            @platform.PlatformName
+                        </option>
                     }
                 </select>
             </div>
@@ -43,7 +47,7 @@
                     <option value="">All</option>
                     @foreach (var rating in ViewBag.ImdbRatings as IEnumerable<decimal?>)
                     {
-                        <option value="@rating.Value.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)">
+                        <option value="@rating.Value.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)" selected="@(rating.Value == ViewBag.SelectedImdbRating ? "selected" : null)">
                             @rating.Value.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)
                         </option>
             

@@ -37,15 +37,18 @@ namespace WebAppMovieProject.Controllers
             if (CategoryId.HasValue && CategoryId.Value > 0)
             {
                 movies = movies.Where(m => m.Categories.Any(c => c.CategoryId == CategoryId)).OrderBy(x => x.Title);
+                ViewBag.SelectedCategoryId = CategoryId.Value;
             }
             if (PlatformId.HasValue && PlatformId.Value > 0)
             {
                 movies = movies.Where(m => m.PlatformId == PlatformId).OrderBy(c => c.Title);
+                ViewBag.SelectedPlatformId = PlatformId.Value;
             }
 
             if (ImdbRating.HasValue)
             {
                 movies = movies.Where(m => m.ImdbRating >= ImdbRating).OrderBy(c => c.ImdbRating);
+                ViewBag.SelectedImdbRating = ImdbRating.Value;
             }
 
             var imdbRatings = db.Movies.Select(m => m.ImdbRating).Distinct().OrderBy(r => r).ToList();
